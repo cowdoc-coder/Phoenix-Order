@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phoenix Dairy — Animal Health Order</title>
+<meta name="theme-color" content="#16140f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Order">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%2316140f'/%3E%3Crect x='30' y='60' width='120' height='14' rx='4' fill='%231f6e3d'/%3E%3Crect x='30' y='90' width='120' height='14' rx='4' fill='%23f4f1e9'/%3E%3Crect x='30' y='120' width='80' height='14' rx='4' fill='%23f4f1e9'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2316140f'/%3E%3Crect x='6' y='11' width='20' height='3' fill='%231f6e3d'/%3E%3Crect x='6' y='17' width='20' height='3' fill='%23f4f1e9'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Spline+Sans:wght@400;500;600&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#16140f;--paper:#f4f1e9;--card:#fffdf8;--line:#ddd6c4;--accent:#1f6e3d;--accent-dk:#164d2b;--muted:#7d7665;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{font-family:'Spline Sans',sans-serif;background:var(--paper);color:var(--ink);padding-bottom:128px;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:760px;margin:0 auto;}
+  header{background:var(--ink);color:var(--paper);padding:16px 16px 14px;position:sticky;top:0;z-index:20;border-bottom:3px solid var(--accent);}
+  .htop{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;max-width:760px;margin:0 auto;}
+  .brand{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-.5px;line-height:1.05;}
+  .lang{display:flex;border:1px solid #3b3527;border-radius:8px;overflow:hidden;flex-shrink:0;}
+  .lang button{background:#262218;color:#cfc8b6;border:none;padding:7px 12px;font-family:'Bricolage Grotesque';font-weight:800;font-size:13px;cursor:pointer;letter-spacing:.5px;}
+  .lang button.active{background:var(--accent);color:#fff;}
+  .sub{font-size:12px;color:#cfc8b6;margin-top:6px;letter-spacing:.3px;max-width:760px;margin-left:auto;margin-right:auto;}
+  .sub b{color:var(--paper);font-weight:600;}
+  .who{display:flex;align-items:center;gap:8px;margin-top:13px;max-width:760px;margin-left:auto;margin-right:auto;}
+  .who label{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#cfc8b6;}
+  .who input{flex:1;background:#262218;border:1px solid #3b3527;color:var(--paper);border-radius:8px;padding:9px 11px;font-family:'Spline Sans';font-size:15px;}
+  .who input:focus{outline:none;border-color:var(--accent);}
+  .searchwrap{padding:13px 14px 4px;position:sticky;top:124px;z-index:15;background:linear-gradient(var(--paper) 72%,transparent);}
+  #search{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:15px;font-family:'Spline Sans';background:var(--card);color:var(--ink);}
+  #search:focus{outline:none;border-color:var(--accent);}
+  .collabels{display:grid;grid-template-columns:1fr 78px 110px;gap:8px;padding:8px 24px 4px;font-size:9.5px;letter-spacing:1px;color:var(--muted);font-weight:600;text-transform:uppercase;}
+  .collabels span:nth-child(2){text-align:center;line-height:1.05;}
+  .collabels span:nth-child(3){text-align:center;}
+  .list{padding:0 12px;}
+  .row{display:grid;grid-template-columns:1fr 78px 110px;gap:8px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;transition:border-color .15s,box-shadow .15s;}
+  .row.active{border-color:var(--accent);box-shadow:0 0 0 2px rgba(31,110,61,.12);}
+  .row.hidden{display:none;}
+  .name{font-size:14px;font-weight:600;line-height:1.2;min-width:0;}
+  .rm{font-size:11px;color:var(--accent);font-weight:600;cursor:pointer;margin-top:3px;display:inline-block;}
+  .pack{justify-self:center;text-align:center;font-size:10.5px;color:var(--muted);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:5px 4px;width:100%;text-transform:uppercase;letter-spacing:.4px;line-height:1.1;}
+  .stepper{display:flex;align-items:center;justify-self:end;}
+  .stepper button{width:32px;height:36px;border:1.5px solid var(--line);background:var(--paper);font-size:20px;line-height:1;color:var(--ink);cursor:pointer;font-family:'Bricolage Grotesque';display:flex;align-items:center;justify-content:center;}
+  .stepper button:active{background:var(--line);}
+  .stepper .minus{border-radius:9px 0 0 9px;border-right:none;}
+  .stepper .plus{border-radius:0 9px 9px 0;border-left:none;}
+  .qty{width:42px;height:36px;text-align:center;border:1.5px solid var(--line);font-family:'DM Mono',monospace;font-size:15px;color:var(--ink);background:#fff;-moz-appearance:textfield;}
+  .qty::-webkit-outer-spin-button,.qty::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+  .qty.set{background:#eaf3ed;color:var(--accent-dk);font-weight:600;}
+  .noresult{text-align:center;color:var(--muted);padding:24px 10px;font-size:14px;}
+  .additem{margin:6px 12px 0;background:var(--card);border:1.5px dashed var(--line);border-radius:12px;padding:14px;}
+  .additem-title{font-family:'Bricolage Grotesque';font-weight:800;font-size:14px;margin-bottom:11px;color:var(--ink);}
+  .additem .fields{display:flex;gap:8px;flex-wrap:wrap;}
+  .additem input{flex:1;min-width:140px;padding:11px 12px;border:1.5px solid var(--line);border-radius:9px;font-size:15px;font-family:'Spline Sans';background:#fff;color:var(--ink);margin-bottom:8px;}
+  .additem input.packin{flex:0 0 150px;}
+  .additem input:focus{outline:none;border-color:var(--accent);}
+  .additem button{width:100%;background:var(--ink);color:var(--paper);border:none;border-radius:9px;padding:12px;font-family:'Bricolage Grotesque';font-weight:800;font-size:15px;cursor:pointer;}
+  .additem button:active{background:#000;}
+  footer{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--card);border-top:1px solid var(--line);padding:12px 14px calc(12px + env(safe-area-inset-bottom));box-shadow:0 -8px 24px rgba(0,0,0,.08);}
+  .footin{max-width:760px;margin:0 auto;}
+  .summary{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--muted);margin-bottom:9px;}
+  .summary b{font-family:'DM Mono';color:var(--ink);font-size:15px;}
+  .btns{display:flex;gap:9px;}
+  .send{flex:1;background:var(--accent);color:#fff;border:none;border-radius:11px;padding:15px;font-family:'Bricolage Grotesque';font-weight:800;font-size:16px;letter-spacing:.2px;cursor:pointer;}
+  .send:active{background:var(--accent-dk);}
+  .send:disabled{background:#b9c4bc;cursor:not-allowed;}
+  .copy{width:56px;background:var(--paper);border:1.5px solid var(--line);border-radius:11px;font-size:20px;cursor:pointer;color:var(--ink);}
+  .copy:active{background:var(--line);}
+  .toast{position:fixed;bottom:150px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--paper);padding:11px 18px;border-radius:30px;font-size:13.5px;opacity:0;pointer-events:none;transition:.25s;z-index:40;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:80%;text-align:center;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<header>
+  <div class="htop">
+    <div class="brand">PHOENIX DAIRY<br>· ANIMAL HEALTH</div>
+    <div class="lang"><button data-lang="en" class="active">EN</button><button data-lang="es">ES</button></div>
+  </div>
+  <div class="sub"><span id="t-subto">Order to</span> <b>Johnny Williams</b> · 559-217-6778</div>
+  <div class="who"><label id="t-from" for="orderedby">From</label><input id="orderedby" type="text" value="Eric" autocomplete="off"></div>
+</header>
+
+<div class="wrap">
+  <div class="searchwrap"><input id="search" type="text" placeholder="Search products…" autocomplete="off"></div>
+  <div class="collabels"><span id="t-col-prod">PRODUCT</span><span id="t-col-pack">PACKING</span><span id="t-col-qty">QTY</span></div>
+  <div class="list" id="list"></div>
+  <div class="noresult hidden" id="noresult">No products match that search.</div>
+  <div class="additem">
+    <div class="additem-title" id="t-add-title">+ Add another product</div>
+    <div class="fields">
+      <input id="add-name" type="text" placeholder="Product name" autocomplete="off">
+      <input id="add-pack" class="packin" type="text" placeholder="Packing (CASE, BOX…)" autocomplete="off">
+    </div>
+    <button id="add-btn">Add</button>
+  </div>
+</div>
+
+<footer><div class="footin">
+  <div class="summary"><span id="count">No items selected</span><span><b id="total">0</b> <span id="t-units">total units</span></span></div>
+  <div class="btns">
+    <button class="send" id="send" disabled>Send the order to Johnny</button>
+    <button class="copy" id="copy" title="Copy">&#9106;</button>
+  </div>
+</div></footer>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ====== SET THESE TWO TO YOUR REPO ====== */
+const GH_OWNER = "cowdoc-coder";
+const GH_REPO  = "Phoenix-Order";
+/* ======================================== */
+
+const I18N = {
+  en:{ subto:"Order to", from:"From", search:"Search products\u2026",
+    colProd:"PRODUCT", colPack:"PACKING", colQty:"QTY",
+    addTitle:"+ Add another product", addName:"Product name", addPack:"Packing (CASE, BOX\u2026)", addBtn:"Add",
+    none:"No items selected", units:"total units", sel:n=>`${n} product${n>1?'s':''} selected`,
+    send:"Send the order to Johnny", sending:"Sending\u2026", sent:"Order sent to Johnny \u2713",
+    sendFail:"Couldn't send \u2014 try again", authFail:"Send token rejected \u2014 re-enter it",
+    tokenPrompt:"One-time setup: paste the GitHub send token for this device",
+    nothingCopy:"Nothing to copy yet", copied:"Order copied", copyFail:"Couldn't copy \u2014 long-press to select",
+    noresult:"No products match that search.", needName:"Enter a product name", added:"Added" },
+  es:{ subto:"Pedido para", from:"De", search:"Buscar productos\u2026",
+    colProd:"PRODUCTO", colPack:"PRESENTACI\u00d3N", colQty:"CANT.",
+    addTitle:"+ Agregar otro producto", addName:"Nombre del producto", addPack:"Presentaci\u00f3n (CASE, BOX\u2026)", addBtn:"Agregar",
+    none:"Sin productos seleccionados", units:"unidades en total", sel:n=>`${n} producto${n>1?'s':''} seleccionado${n>1?'s':''}`,
+    send:"Enviar pedido a Johnny", sending:"Enviando\u2026", sent:"Pedido enviado a Johnny \u2713",
+    sendFail:"No se pudo enviar \u2014 intenta de nuevo", authFail:"Token rechazado \u2014 ingr\u00e9salo de nuevo",
+    tokenPrompt:"Configuraci\u00f3n inicial: pega el token de env\u00edo de GitHub para este dispositivo",
+    nothingCopy:"Nada que copiar todav\u00eda", copied:"Pedido copiado", copyFail:"No se pudo copiar \u2014 mant\u00e9n presionado para seleccionar",
+    noresult:"Ning\u00fan producto coincide con la b\u00fasqueda.", needName:"Ingresa el nombre del producto", added:"Agregado" }
+};
+
+const BASE = [
+ ["STERILE WATER FOR INJECTION","CASE"],["HYPERTONIC SALINE","CASE"],["DEXTROSE","CASE"],
+ ["CMPK","CASE"],["PROPALYNE GLYCOL","GALLON"],["MINERAL OIL","GALLON"],["THERABLOAT","BOTTLE"],
+ ["Banamine TD","1 L"],["OXYTOCIN INJECTION 100ML","BOTTLE"],["SULFADIMETHAXINE 15 gram bolus","BOTTLE"],
+ ["THIAMINE HYDROCHLORIDE 100ML","BOTTLE"],["DEXAMTHASONE 100ML","BOTTLE"],["TETRACYCLINE","UNIT"],
+ ["BLUE COTE","BOTTLE"],["INTESTISORB","JAR"],["ASPIRIN BOLUSES","JAR"],["SRP VACCINE","BOTTLE"],
+ ["ESTROPLAN (LUT) 50 DOSES","BOTTLE"],["GONABREED (GNRH) 50 DOSE","BOTTLE"],["NEEDLES 14 X 2\" X 100","BOX"],
+ ["NEEDLES 16 X 1\" X 100","BOX"],["NEEDLES 14 X 1\" X 100","BOX"],["NEEDLES 20 X 1\" X 105","BOX"],
+ ["DA TOGGLE","UNIT"],["J-LUBE","BOTTLE"],["WHITE LEG BANDS","DOZEN"],["RED LEG BANDS","DOZEN"],
+ ["Blue LEG BANDS","DOZEN"],["YELLOW LEG BANDS","DOZEN"],["SLEEVE GLOVES VETONE","CASE"],
+ ["HOT SHOT rechargeable","UNIT"],["MilkSample","Box"],["BLUE END IVS SET","UNIT"],["COTTON ROLL","UNIT"],
+ ["mikl chart 157","UNIT"],["EAR TAG yellow","UNIT"],["BAG BALM","JAR"],["MILK FILTERS","BOX"],
+ ["QUICK STRIKE FLY BAIT","BUCKET"],["HAND SOAP","UNIT"],["GEL CAPSULES #7","JAR"],["BOVI BLEND","BOX"],
+ ["BOVIKALC","CASE"],["Cefenil RTU","BOTTLE"],["LAXADE BOLUS","JAR"],["SPECTRAMAST DC","BUCKET"],
+ ["ORBESEAL","BUCKET"],["SPECTRAMAST LC","BUCKET"],["Aluminum Broom Handle","BUCKET"],
+ ["LA.CO PAINT STICK GREEN","UNIT"],["LA-CO PAINT STICK BLUE","CASE"],["LA-CO PAINT STICK GREEN FL","CASE"],
+ ["LA-CO PAINT STICK PINK","CASE"],["ALLFLEX BLANK YELLOW TAGS","BAG"],["EID TAGS","BOX"],
+ ["EZ CHLOR BIG TABS","BUCKET"],["PAPER TOWELS BLUE","CASE"],["NITRILE GLOVES SIZE L BLUE","CASE"],
+ ["INFUSETTE DRILLED 21\" 25/PK","BAG"],["SORTING STICK FIBERGLASS","UNIT"],["POLYFLEX","BOTTLE"],
+ ["ISOPROPYALCHOHOL 99%","GALLON"],["CHlorhexidine solution 2% gal","GALLON"],["VITA JEC ( B COMPLEX 250ML)","BOTTLE"],
+ ["SYRINGES 60 ML X 20 UNITS","BOX"],["SYRINGES 35 ML X 20 UNITS","BOX"],["SYRINGES 20 ML X 50 UNITS","BOX"],
+ ["SYRINGES 3 ML X 100 UNITS","BOX"],["Pecti-sorb gel capsules","JAR"],["TOILET PAPER JUMBO ROLLS","CASE"],
+ ["HOBBLES","UNIT"],["colostrum bags","box"],["colostrum feeding tubes","box"],
+ ["Chips de los patas (982 Yellow RFID)","box"],["Chips de oreja (840 White RFID)","box"],
+ ["LIME for CALF PEN","bag (50 lbs)"],["OVA COMPLETE6KG","CASE"]
+];
+const items = BASE.map(([name,pack])=>({name,pack,qty:0,custom:false}));
+
+let lang="en", t=I18N.en;
+function loadLang(){ try{return localStorage.getItem("phoenix_lang")||"en";}catch{return "en";} }
+function saveLang(l){ try{localStorage.setItem("phoenix_lang",l);}catch{} }
+function loadToken(){ try{return localStorage.getItem("phoenix_gh_token")||"";}catch{return "";} }
+function saveToken(v){ try{localStorage.setItem("phoenix_gh_token",v);}catch{} }
+function clearToken(){ try{localStorage.removeItem("phoenix_gh_token");}catch{} }
+
+const list=document.getElementById('list'), searchEl=document.getElementById('search'), sendBtn=document.getElementById('send');
+
+function buildRow(it){
+  const row=document.createElement('div'); row.className='row'+(it.qty>0?' active':'');
+  const nameCell=document.createElement('div'); nameCell.className='name'; nameCell.textContent=it.name;
+  if(it.custom){ const rm=document.createElement('span'); rm.className='rm'; rm.textContent='\u2715';
+    rm.onclick=()=>{const i=items.indexOf(it); if(i>-1) items.splice(i,1); row.remove(); refresh();};
+    nameCell.appendChild(document.createElement('br')); nameCell.appendChild(rm); }
+  const packCell=document.createElement('div'); packCell.className='pack'; packCell.textContent=it.pack;
+  const step=document.createElement('div'); step.className='stepper';
+  const minus=document.createElement('button'); minus.className='minus'; minus.textContent='\u2013';
+  const input=document.createElement('input'); input.className='qty'+(it.qty>0?' set':''); input.type='number'; input.inputMode='numeric'; input.min='0'; input.value=it.qty;
+  const plus=document.createElement('button'); plus.className='plus'; plus.textContent='+';
+  const set=v=>{v=Math.max(0,parseInt(v)||0); it.qty=v; input.value=v; input.classList.toggle('set',v>0); row.classList.toggle('active',v>0); refresh();};
+  minus.onclick=()=>set(it.qty-1); plus.onclick=()=>set(it.qty+1); input.onchange=()=>set(input.value); input.onfocus=()=>input.select();
+  step.append(minus,input,plus); row.dataset.name=it.name.toLowerCase(); row.append(nameCell,packCell,step);
+  const q=searchEl.value.toLowerCase().trim(); if(q && !it.name.toLowerCase().includes(q)) row.classList.add('hidden');
+  return row;
+}
+function renderAll(){ list.innerHTML=''; items.forEach(it=>list.appendChild(buildRow(it))); }
+function refresh(){
+  const lines=items.filter(i=>i.qty>0).length, total=items.reduce((a,b)=>a+b.qty,0);
+  document.getElementById('total').textContent=total;
+  document.getElementById('count').textContent = lines===0 ? t.none : t.sel(lines);
+  sendBtn.disabled = lines===0;
+}
+/* ALWAYS English, regardless of UI language */
+function buildMessage(){
+  const who=(document.getElementById('orderedby').value||"").trim()||"Eric";
+  const d=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  let msg=`Phoenix Dairy order \u2014 from ${who} (${d}):\n\n`;
+  items.forEach(it=>{ if(it.qty>0) msg+=`${it.qty} ${it.pack} \u2014 ${it.name}\n`; });
+  return msg.trim();
+}
+searchEl.addEventListener('input',e=>{
+  const q=e.target.value.toLowerCase().trim(); let shown=0;
+  document.querySelectorAll('.row').forEach(r=>{const m=r.dataset.name.includes(q); r.classList.toggle('hidden',!m); if(m) shown++;});
+  const nr=document.getElementById('noresult'); nr.classList.toggle('hidden',shown>0); nr.textContent=t.noresult;
+});
+document.getElementById('add-btn').onclick=()=>{
+  const n=document.getElementById('add-name'), p=document.getElementById('add-pack');
+  const name=n.value.trim(); const pack=(p.value.trim()||'\u2014').toUpperCase();
+  if(!name){ toast(t.needName); n.focus(); return; }
+  const it={name,pack,qty:1,custom:true}; items.push(it); list.appendChild(buildRow(it));
+  n.value=''; p.value=''; refresh(); toast(t.added+': '+name);
+};
+sendBtn.onclick=async()=>{
+  if(items.every(i=>i.qty===0)) return;
+  let token=loadToken();
+  if(!token){ token=(prompt(t.tokenPrompt)||"").trim(); if(!token) return; saveToken(token); }
+  const message=buildMessage(); const orig=sendBtn.textContent;
+  sendBtn.disabled=true; sendBtn.textContent=t.sending;
+  try{
+    const r=await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/dispatches`,{
+      method:'POST',
+      headers:{'Accept':'application/vnd.github+json','Authorization':'Bearer '+token,'Content-Type':'application/json'},
+      body:JSON.stringify({event_type:'send_order', client_payload:{message}})
+    });
+    if(r.status===204){ toast(t.sent); items.forEach(i=>i.qty=0); renderAll(); }
+    else if(r.status===401||r.status===403){ clearToken(); toast(t.authFail); }
+    else { toast(t.sendFail+' ('+r.status+')'); }
+  }catch(e){ toast(t.sendFail); }
+  finally{ sendBtn.textContent=orig; refresh(); }
+};
+document.getElementById('copy').onclick=async()=>{
+  if(items.every(i=>i.qty===0)){ toast(t.nothingCopy); return; }
+  try{ await navigator.clipboard.writeText(buildMessage()); toast(t.copied); }catch{ toast(t.copyFail); }
+};
+function toast(txt){ const el=document.getElementById('toast'); el.textContent=txt; el.classList.add('show'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),2000); }
+function applyLang(l){
+  lang=l; t=I18N[l]; document.documentElement.lang=l;
+  document.querySelectorAll('.lang button').forEach(b=>b.classList.toggle('active',b.dataset.lang===l));
+  document.getElementById('t-subto').textContent=t.subto;
+  document.getElementById('t-from').textContent=t.from;
+  searchEl.placeholder=t.search;
+  document.getElementById('t-col-prod').textContent=t.colProd;
+  document.getElementById('t-col-pack').textContent=t.colPack;
+  document.getElementById('t-col-qty').textContent=t.colQty;
+  document.getElementById('t-add-title').textContent=t.addTitle;
+  document.getElementById('add-name').placeholder=t.addName;
+  document.getElementById('add-pack').placeholder=t.addPack;
+  document.getElementById('add-btn').textContent=t.addBtn;
+  document.getElementById('t-units').textContent=t.units;
+  sendBtn.textContent=t.send;
+  document.getElementById('noresult').textContent=t.noresult;
+  refresh(); saveLang(l);
+}
+document.querySelectorAll('.lang button').forEach(b=>b.onclick=()=>applyLang(b.dataset.lang));
+renderAll(); applyLang(loadLang());
+</script>
+</body>
+</html>
