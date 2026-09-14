@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Phoenix Dairy — Animal Health Order</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta name="theme-color" content="#16140f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -124,7 +125,8 @@ const I18N = {
     sendFail:"Couldn't send \u2014 try again", authFail:"Send token rejected \u2014 re-enter it",
     tokenPrompt:"One-time setup: paste the GitHub send token for this device",
     nothingCopy:"Nothing to copy yet", copied:"Order copied", copyFail:"Couldn't copy \u2014 long-press to select",
-    noresult:"No products match that search.", needName:"Enter a product name", added:"Added" },
+    noresult:"No products match that search.", needName:"Enter a product name", added:"Added",
+    already:"Already on the list" },
   es:{ subto:"Pedido para", from:"De", search:"Buscar productos\u2026",
     colProd:"PRODUCTO", colPack:"PRESENTACI\u00d3N", colQty:"CANT.",
     addTitle:"+ Agregar otro producto", addName:"Nombre del producto", addPack:"Presentaci\u00f3n (CASE, BOX\u2026)", addBtn:"Agregar",
@@ -133,7 +135,8 @@ const I18N = {
     sendFail:"No se pudo enviar \u2014 intenta de nuevo", authFail:"Token rechazado \u2014 ingr\u00e9salo de nuevo",
     tokenPrompt:"Configuraci\u00f3n inicial: pega el token de env\u00edo de GitHub para este dispositivo",
     nothingCopy:"Nada que copiar todav\u00eda", copied:"Pedido copiado", copyFail:"No se pudo copiar \u2014 mant\u00e9n presionado para seleccionar",
-    noresult:"Ning\u00fan producto coincide con la b\u00fasqueda.", needName:"Ingresa el nombre del producto", added:"Agregado" }
+    noresult:"Ning\u00fan producto coincide con la b\u00fasqueda.", needName:"Ingresa el nombre del producto", added:"Agregado",
+    already:"Ya est\u00e1 en la lista" }
 };
 
 const BASE = [
@@ -163,6 +166,7 @@ const BASE = [
  ["LIME for CALF PEN","bag (50 lbs)"],["OVA COMPLETE6KG","CASE"]
 ];
 const items = BASE.map(([name,pack])=>({name,pack,qty:0,custom:false}));
+const EXTRAS_KEY="phoenix_extras";
 
 let lang="en", t=I18N.en;
 function loadLang(){ try{return localStorage.getItem("phoenix_lang")||"en";}catch{return "en";} }
@@ -171,13 +175,62 @@ function loadToken(){ try{return localStorage.getItem("phoenix_gh_token")||"";}c
 function saveToken(v){ try{localStorage.setItem("phoenix_gh_token",v);}catch{} }
 function clearToken(){ try{localStorage.removeItem("phoenix_gh_token");}catch{} }
 
+function sortItems(){
+  items.sort((a,b)=>a.name.localeCompare(b.name,"en",{sensitivity:"base",numeric:true}));
+}
+function parseExtras(raw){
+  if(!raw) return {updated:0,items:[]};
+  const data=typeof raw==="string"?JSON.parse(raw):raw;
+  if(Array.isArray(data)) return {updated:0,items:data.filter(e=>e&&e.name)};
+  if(data&&Array.isArray(data.items)) return {updated:Number(data.updated)||0,items:data.items.filter(e=>e&&e.name)};
+  return {updated:0,items:[]};
+}
+function loadExtras(){
+  try{return parseExtras(localStorage.getItem(EXTRAS_KEY));}catch{return {updated:0,items:[]};}
+}
+function extrasFromItems(){
+  return items.filter(i=>i.custom).map(i=>({name:i.name,pack:i.pack}));
+}
+function saveExtrasLocal(payload){
+  try{localStorage.setItem(EXTRAS_KEY,JSON.stringify(payload));}catch{}
+}
+function applyExtras(extraItems){
+  const have=new Set(items.map(i=>i.name.toLowerCase()));
+  extraItems.forEach(e=>{
+    const name=String(e.name||"").trim(); if(!name) return;
+    const key=name.toLowerCase(); if(have.has(key)) return;
+    have.add(key);
+    items.push({name, pack:String(e.pack||"\u2014").trim()||"\u2014", qty:0, custom:true});
+  });
+}
+function utf8ToB64(str){
+  return btoa(unescape(encodeURIComponent(str)));
+}
+async function persistExtrasRemote(payload){
+  const token=loadToken();
+  if(!token) return;
+  const api=`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/products-extra.json`;
+  const headers={"Accept":"application/vnd.github+json","Authorization":"Bearer "+token};
+  try{
+    const body={message:"Save products on the Phoenix order form",content:utf8ToB64(JSON.stringify(payload,null,2)+"\n")};
+    const get=await fetch(api,{headers});
+    if(get.ok){ const data=await get.json(); if(data.sha) body.sha=data.sha; }
+    await fetch(api,{method:"PUT",headers:{...headers,"Content-Type":"application/json"},body:JSON.stringify(body)});
+  }catch{}
+}
+function saveExtras(){
+  const payload={updated:Date.now(), items:extrasFromItems()};
+  saveExtrasLocal(payload);
+  persistExtrasRemote(payload);
+}
+
 const list=document.getElementById('list'), searchEl=document.getElementById('search'), sendBtn=document.getElementById('send');
 
 function buildRow(it){
   const row=document.createElement('div'); row.className='row'+(it.qty>0?' active':'');
   const nameCell=document.createElement('div'); nameCell.className='name'; nameCell.textContent=it.name;
   if(it.custom){ const rm=document.createElement('span'); rm.className='rm'; rm.textContent='\u2715';
-    rm.onclick=()=>{const i=items.indexOf(it); if(i>-1) items.splice(i,1); row.remove(); refresh();};
+    rm.onclick=()=>{const i=items.indexOf(it); if(i>-1) items.splice(i,1); saveExtras(); row.remove(); refresh();};
     nameCell.appendChild(document.createElement('br')); nameCell.appendChild(rm); }
   const packCell=document.createElement('div'); packCell.className='pack'; packCell.textContent=it.pack;
   const step=document.createElement('div'); step.className='stepper';
@@ -214,8 +267,15 @@ document.getElementById('add-btn').onclick=()=>{
   const n=document.getElementById('add-name'), p=document.getElementById('add-pack');
   const name=n.value.trim(); const pack=(p.value.trim()||'\u2014').toUpperCase();
   if(!name){ toast(t.needName); n.focus(); return; }
-  const it={name,pack,qty:1,custom:true}; items.push(it); list.appendChild(buildRow(it));
-  n.value=''; p.value=''; refresh(); toast(t.added+': '+name);
+  const existing=items.find(i=>i.name.toLowerCase()===name.toLowerCase());
+  n.value=''; p.value='';
+  if(existing){
+    if(existing.qty<1) existing.qty=1;
+    renderAll(); refresh(); toast(t.already+': '+existing.name);
+    return;
+  }
+  items.push({name,pack,qty:1,custom:true});
+  sortItems(); saveExtras(); renderAll(); refresh(); toast(t.added+': '+name);
 };
 sendBtn.onclick=async()=>{
   if(items.every(i=>i.qty===0)) return;
@@ -229,7 +289,7 @@ sendBtn.onclick=async()=>{
       headers:{'Accept':'application/vnd.github+json','Authorization':'Bearer '+token,'Content-Type':'application/json'},
       body:JSON.stringify({event_type:'send_order', client_payload:{message}})
     });
-    if(r.status===204){ toast(t.sent); items.forEach(i=>i.qty=0); renderAll(); }
+    if(r.status===204){ toast(t.sent); items.forEach(i=>i.qty=0); saveExtras(); renderAll(); }
     else if(r.status===401||r.status===403){ clearToken(); toast(t.authFail); }
     else { toast(t.sendFail+' ('+r.status+')'); }
   }catch(e){ toast(t.sendFail); }
@@ -258,8 +318,30 @@ function applyLang(l){
   document.getElementById('noresult').textContent=t.noresult;
   refresh(); saveLang(l);
 }
+async function bootRemoteCatalog(local){
+  try{
+    const r=await fetch("products-extra.json?ts="+Date.now());
+    if(!r.ok) return;
+    const remote=parseExtras(await r.json());
+    const before=items.filter(i=>i.custom).length;
+    applyExtras(remote.items);
+    if(items.filter(i=>i.custom).length!==before){
+      saveExtrasLocal({updated:Math.max(local.updated, remote.updated), items:extrasFromItems()});
+      sortItems();
+      renderAll();
+      refresh();
+    }
+  }catch{}
+}
+document.getElementById('add-name').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('add-btn').click(); });
+document.getElementById('add-pack').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('add-btn').click(); });
 document.querySelectorAll('.lang button').forEach(b=>b.onclick=()=>applyLang(b.dataset.lang));
-renderAll(); applyLang(loadLang());
+const localExtras=loadExtras();
+applyExtras(localExtras.items);
+sortItems();
+renderAll();
+applyLang(loadLang());
+bootRemoteCatalog(localExtras);
 </script>
 </body>
 </html>
