@@ -41,8 +41,8 @@ These live server-side and are never exposed to the browser.
 ### 3. Point the form at your repo
 Edit the top of the `<script>` in `index.html`:
 ```js
-const GH_OWNER = "YOUR_GITHUB_USERNAME";
-const GH_REPO  = "phoenix-order";
+const GH_OWNER = "cowdoc-coder";
+const GH_REPO  = "Phoenix-Order";
 ```
 Commit the change.
 
@@ -65,9 +65,10 @@ browser only and reused after that. (It is **not** in the code or the repo.)
 ---
 
 ## Daily use
-Set quantities (or add custom products at the bottom), press **Send the order
+Set quantities (or add products at the bottom), press **Send the order
 to Johnny**. The Action fires and Johnny gets the SMS within a few seconds.
-The order resets so the next one starts clean.
+The order resets so the next one starts clean. Products you add stay on the
+list (this device immediately; every device after GitHub Pages refreshes).
 
 - **Add to Home Screen** on a phone for an app-like icon (Share → Add to Home
   Screen on iPhone; ⋮ → Add to Home screen on Android).
@@ -75,8 +76,12 @@ The order resets so the next one starts clean.
 - The copy button (⧉) is a manual backup that copies the order text.
 
 ## Updating the product list
-Edit `index.html` (the `BASE` list), commit, and the live link updates within a
-minute for everyone — no need to resend anything.
+Use **+ Add another product** on the form. Added products are saved and shown
+in alphabetical order. Removing a product (the × under a saved extra) drops it
+from the saved list too.
+
+You can still edit the `BASE` list in `index.html` and commit if you want to
+change the built-in catalog in the source.
 
 ## Security note
 The Twilio keys are safe in Actions Secrets. The per-device send token can
