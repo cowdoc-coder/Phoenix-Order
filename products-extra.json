@@ -1,5 +1,5 @@
 {
-  "updated": 1791834501666,
+  "updated": 1791834512921,
   "items": [
     {
       "name": "Calci Cure (Pastillas)",
@@ -28,6 +28,7 @@
   ],
   "removed": [
     "bovikalc",
-    "calci cure"
+    "calci cure",
+    "orbeseal"
   ]
 }
