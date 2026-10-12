@@ -1,5 +1,5 @@
 {
-  "updated": 1791833909831,
+  "updated": 1791834441877,
   "items": [
     {
       "name": "Calci Cure",
@@ -25,5 +25,8 @@
       "name": "T-Hex External Teat Sealent",
       "pack": "CASE"
     }
+  ],
+  "removed": [
+    "bovikalc"
   ]
 }
